@@ -5,8 +5,11 @@
 rem Easiest way to compile:
 rem cl monitortoggler.c /link user32.lib
 
-rem Second easiest way to compile (Os optimize size):
-cl /Os src/monitortoggler.c /link user32.lib
+rem Smaller way to compile, I would like to know even smaller btw,
+rem but then again I'm not just yet in mood of littering C code with 
+rem calls to DLL imports...
+cl /nologo /O1 /c src/monitortoggler.c
+link /nologo monitortoggler.obj user32.lib
 
 rem Delete obj file, it's useless
 del monitortoggler.obj

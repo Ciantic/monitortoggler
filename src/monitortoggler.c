@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
 
 
     if (argc <= 1) {
-        puts("Monitor toggler 0.3"
+        puts("Monitor toggler 0.3.1"
         "\r\n"
         "\r\nUsage: monitortoggler.exe <monitornumber> [<forceState>] [<apply>]"
         "\r\n"
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]){
 
     // If user wants to toggle, we must get the state is it on or off.
     if (forceState == -1) {
-        printf("Retrieving state of %d using 'EnumDisplaySettingsEx'...\r\n", monitor_number);
+        printf("Retrieving state of '%s' using 'EnumDisplaySettingsEx'...\r\n", displayDeviceToggled.DeviceName);
 
         // Query the state
         if (!EnumDisplaySettingsEx((LPSTR) displayDeviceToggled.DeviceName, ENUM_CURRENT_SETTINGS, &currentMode, NULL)) {
