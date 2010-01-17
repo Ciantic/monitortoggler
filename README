@@ -10,20 +10,20 @@ Usage: monitortoggler.exe <monitornumber> [<forceState>] [<apply>]
         to be useless to define them while attaching.
 
   monitornumber:
-                         Monitor number, this may, and usually differs from monitor numbers
-                         in the screen resolution dialog. So you have to try several numbers
-                         until you find the right one :)
+             Monitor number, this may, and usually differs from monitor numbers
+             in the screen resolution dialog. So you have to try several numbers
+             until you find the right one :)
 
   forceState (optional):
-                        -1 = Toggles. (Tries to get the current mode, and toggles.) (default)
-                         1 = Attach
-                         0 = Detach
+            -1 = Toggles. (Tries to get the current mode, and toggles.) (default)
+             1 = Attach
+             0 = Detach
 
   apply (optional):
-                         1 = Apply changes immediately (default)
-                         0 = Do not apply changes
-                             You have to call second time to apply changes
+             1 = Apply changes immediately (default)
+             0 = Do not apply changes
+                 You have to call second time to apply changes
 
   Author:     Jari Pennanen (2010) <jari.pennanen@gmail.com>
-  License:    FreeBSD License
+  License:    FreeBSD License, see COPYING
   Repository: http://github.com/Ciantic/monitortoggler
