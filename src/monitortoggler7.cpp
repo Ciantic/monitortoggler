@@ -73,6 +73,7 @@ void getDisplayConfigSourceName(LUID adapterId, UINT32 sourceId) {
     if (!DisplayConfigGetDeviceInfoResult(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
         return;
     wprintf(deviceName.viewGdiDeviceName);
+    puts("");
 }
 
 int main(int argc, char *argv[]){
@@ -93,12 +94,14 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < num_of_paths; i++) {
         printf("Path %d\r\n", i);
         getDisplayConfigSourceName(dpaths[i].sourceInfo.adapterId, dpaths[i].sourceInfo.id);
-        printf("  Source id: %d", dpaths[i].sourceInfo.id);
+        printf("  Source id: %d\r\n", dpaths[i].sourceInfo.id);
     }
     
+    puts("");
     
     for (int i = 0; i < num_of_infos; i++) {
+        puts("");
         printf("Info %d\r\n", i);
-        printf("  Target adapter: %d\r\n", dinfos[i].adapterId);
+        getDisplayConfigSourceName(dinfos[i].adapterId, dinfos[i].id);
     }
 }
