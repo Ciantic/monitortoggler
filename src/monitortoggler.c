@@ -43,6 +43,7 @@ int main(int argc, char *argv[]){
     DISPLAY_DEVICE displayDeviceToggled;
     DEVMODE defaultMode;
     DEVMODE currentMode;
+    DEVMODE currentRegistryMode;
     long int monitor_number;
     long int forceState = -1;
     long int apply = 1;
@@ -59,9 +60,12 @@ int main(int argc, char *argv[]){
     ZeroMemory(&currentMode, sizeof(DEVMODE));
     currentMode.dmSize = sizeof(DEVMODE);
 
+    ZeroMemory(&currentRegistryMode, sizeof(DEVMODE));
+    currentRegistryMode.dmSize = sizeof(DEVMODE);
+
 
     if (argc <= 1) {
-        puts("Monitor toggler 0.3.1"
+        puts("Monitor toggler 0.3.2"
         "\r\n"
         "\r\nUsage: monitortoggler.exe <monitornumber> [<forceState>] [<apply>]"
         "\r\n"
@@ -156,11 +160,13 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    // DEVMODE Settings
-    defaultMode.dmFields = DM_POSITION;
-
     // Detach or attach?
     if (forceState == 0) {
+        puts("  Saving settings of monitor...");
+        
+        if (!EnumDisplaySettingsEx((LPSTR) displayDeviceToggled.DeviceName, ENUM_REGISTRY_SETTINGS, &currentRegistryMode, NULL))
+            return 0;
+        
         puts("  Detaching monitor...");
         // Setting these, means "detaching" monitor Detaching code: http://support.microsoft.com/kb/306399
         defaultMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_POSITION;
@@ -169,21 +175,20 @@ int main(int argc, char *argv[]){
     } else {
         // Attaching code: http://support.microsoft.com/kb/308216
         puts("  Attaching monitor...");
+        defaultMode.dmFields = DM_POSITION;
     }
 
     // Change the settings
     if (!ChangeSettingsExResult(ChangeDisplaySettingsEx((LPSTR)displayDeviceToggled.DeviceName, &defaultMode, NULL, CDS_NORESET|CDS_UPDATEREGISTRY, NULL)))
         return 0;
-
+    
     puts("Ok.\n");
-
+    
+    // Second call applies the changes
     if (apply == 1) {
         puts("Trying to apply settings changes...");
-
-        // Second call applies the changes
         if (!ChangeSettingsExResult(ChangeDisplaySettingsEx (NULL, NULL, NULL, 0, NULL)))
             return 0;
-
         puts("Ok.\n");
     }
 

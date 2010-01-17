@@ -1,4 +1,4 @@
-Monitor toggler 0.3.1
+Monitor toggler 0.3.2
 
 Usage: monitortoggler.exe <monitornumber> [<forceState>] [<apply>]
 
