@@ -202,18 +202,29 @@ int main(int argc, char *argv[]){
     }
     /*
         Discovered from SetDisplayConfig so far:
+        ----------------------------------------
         (First you must know what WIN + P shortcut does in Windows 7, try that.)
-            Computer only:
-                SDC_APPLY|SDC_TOPOLOGY_INTERNAL
-            Projector only:
-                SDC_APPLY|SDC_TOPOLOGY_EXTERNAL
-            Extended:
-                SDC_APPLY|SDC_TOPOLOGY_EXTEND
-            Duplicate a.k.a clone:
-                SDC_APPLY|SDC_TOPOLOGY_CLONE
+
+        Computer only:
+            SDC_APPLY|SDC_TOPOLOGY_INTERNAL
+        Projector only:
+            SDC_APPLY|SDC_TOPOLOGY_EXTERNAL
+        Extended:
+            SDC_APPLY|SDC_TOPOLOGY_EXTEND
+        Duplicate a.k.a clone:
+            SDC_APPLY|SDC_TOPOLOGY_CLONE
+
+        Also what I've understood one can *save* own settings to "Computer only" or
+        "Projector only" or "Extended" somehow, by passing the right Path and Display 
+        infos.
+    
+        Maybe the most easiest way to save the settings I can find out is to allow user 
+        to change settings using Windows dialog (Screen Resolution), and *then* as the 
+        settings seems right, save using SetDisplayConfig to SDC_TOPOLOGY_EXTEND, ...
     */
     //if (!Result_DCGDI(SetDisplayConfig(0, NULL, 0, NULL, SDC_VALIDATE|SDC_TOPOLOGY_INTERNAL)))
     //    return 0;
     //Result_DCGDI(SetDisplayConfig(0, NULL, 0, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL));
+    
     puts("Ahoy there!");
 }
