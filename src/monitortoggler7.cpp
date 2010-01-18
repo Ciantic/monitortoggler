@@ -145,6 +145,8 @@ int main(int argc, char *argv[]){
         return 0;
     
     // Loop through all paths
+    puts("Paths (?):");
+    puts("----------");
     for (int i = 0; i < num_of_paths; i++) {
         printf("Path %d:\r\n", i);
         getGDIDeviceNameFromSource(displayPaths[i].sourceInfo.adapterId, displayPaths[i].sourceInfo.id);
@@ -155,6 +157,8 @@ int main(int argc, char *argv[]){
     
     // Loop through all attached monitors (mode = monitor, I suspect)
     // but same monitor is twice in the array, once as SOURCE and once as TARGET.
+    puts("Attached monitor infos:");
+    puts("-----------------------");
     for (int i = 0; i < num_of_modes; i++) {
         printf("Info %d:\r\n", i);
         printf("  adapaterId: %d, ID: %d\r\n", displayModes[i].adapterId, displayModes[i].id);
