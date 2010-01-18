@@ -216,23 +216,8 @@ int main(int argc, char *argv[]){
     
         E.g. SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL);
     
-        Following is NOT verified:
-        
-        Also what I've understood one can *save* own settings to "Computer only" or
-        "Projector only" or "Extended" somehow, by passing the right Path and Display 
-        infos.
-    
-        Maybe the most easiest way to save the settings I can find out is to allow user 
-        to change settings using Windows dialog (Screen Resolution), and *then* as the 
-        settings seems right, save using SetDisplayConfig to SDC_TOPOLOGY_EXTEND, ...
-        
-        // SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, WHAT_TO_HERE))
-        // This doesn't seem to be correct:
-        //
-        //   SDC_VALIDATE|SDC_SAVE_TO_DATABASE|SDC_USE_SUPPLIED_DISPLAY_CONFIG|SDC_TOPOLOGY_CLONE
-        //
-        // Since SDC_USE_SUPPLIED_DISPLAY_CONFIG cannot be set with SDC_TOPOLOGY_XXX, so is it possible
-        // or not?
+        Also what I've understood one cannot save own settings to "Computer only" or
+        "Projector only" or "Extended" using SetDisplayConfig(...) unfortunately.
     */
     
     // Change to cloned
@@ -240,17 +225,13 @@ int main(int argc, char *argv[]){
     //    return 0;
     //Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY | SDC_TOPOLOGY_CLONE));
     
-    // Save to cloned (this is not possible unfortunately)
-    //if (!Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_VALIDATE|SDC_SAVE_TO_DATABASE|SDC_USE_SUPPLIED_DISPLAY_CONFIG|SDC_TOPOLOGY_CLONE)))
-    //    return 0;
-    //Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL));
     
-    // Validate current
-    //displayPaths[0].flags ^= DISPLAYCONFIG_PATH_ACTIVE;
+    puts("Now change your display settings, from 'Screen Resolution' -dialog of Windows 7...");
+    puts("Press enter to switch back (should not do anything if you don't change settings)...");
+    getchar();
+    if (!Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_VALIDATE | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES)))
+        return 0;
+    Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_APPLY | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES));
     
-    //if (!Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_VALIDATE | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES)))
-    //    return 0;
-    //Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_APPLY | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES));
-    
-    puts("Ahoy there!");
+    puts("Switched back!");
 }
