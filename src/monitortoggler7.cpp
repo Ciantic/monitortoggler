@@ -68,6 +68,9 @@ int Result_DCGDI(int result) {
     return 0;
 }
 
+/*
+    Gets GDI Device name from Source (e.g. \\.\DISPLAY4).
+*/
 void getGDIDeviceNameFromSource(LUID adapterId, UINT32 sourceId) {
     DISPLAYCONFIG_SOURCE_DEVICE_NAME deviceName;
     DISPLAYCONFIG_DEVICE_INFO_HEADER header;
@@ -83,6 +86,10 @@ void getGDIDeviceNameFromSource(LUID adapterId, UINT32 sourceId) {
     puts("");
 }
 
+/*
+    Gets Device Path from Target
+    e.g. \\?\DISPLAY#SAM0304#5&9a89472&0&UID33554704#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}
+*/
 void getMonitorDevicePathFromTarget(LUID adapterId, UINT32 targetId) {
     DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName;
     DISPLAYCONFIG_DEVICE_INFO_HEADER header;
@@ -99,6 +106,9 @@ void getMonitorDevicePathFromTarget(LUID adapterId, UINT32 targetId) {
 }
 
 
+/*
+    Gets Friendly name from Target (e.g. "SyncMaster")
+*/
 void getFriendlyNameFromTarget(LUID adapterId, UINT32 targetId) {
     DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName;
     DISPLAYCONFIG_DEVICE_INFO_HEADER header;
