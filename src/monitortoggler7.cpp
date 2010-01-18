@@ -44,6 +44,7 @@ int Result_QDC(int result) {
 /* 
     result = DisplayConfigGetDeviceInfo(...)
     result = GetDisplayConfigBufferSizes(...)
+    result = SetDisplayConfig(...)
 */
 int Result_DCGDI(int result) {
     switch (result) {
