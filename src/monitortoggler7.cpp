@@ -227,13 +227,30 @@ int main(int argc, char *argv[]){
         settings seems right, save using SetDisplayConfig to SDC_TOPOLOGY_EXTEND, ...
         
         // SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, WHAT_TO_HERE))
+        // This doesn't seem to be correct:
+        //
+        //   SDC_VALIDATE|SDC_SAVE_TO_DATABASE|SDC_USE_SUPPLIED_DISPLAY_CONFIG|SDC_TOPOLOGY_CLONE
+        //
+        // Since SDC_USE_SUPPLIED_DISPLAY_CONFIG cannot be set with SDC_TOPOLOGY_XXX, so is it possible
+        // or not?
     */
     
+    // Change to cloned
+    //if (!Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_VALIDATE | SDC_TOPOLOGY_CLONE)))
+    //    return 0;
+    //Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY | SDC_TOPOLOGY_CLONE));
     
-    // Change to computer
-    //if (!Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_VALIDATE|SDC_TOPOLOGY_INTERNAL)))
+    // Save to cloned
+    //if (!Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_VALIDATE|SDC_SAVE_TO_DATABASE|SDC_USE_SUPPLIED_DISPLAY_CONFIG|SDC_TOPOLOGY_CLONE)))
     //    return 0;
     //Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL));
+    
+    // Validate current
+    //displayPaths[0].flags ^= DISPLAYCONFIG_PATH_ACTIVE;
+    
+    //if (!Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_VALIDATE | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES)))
+    //    return 0;
+    //Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_APPLY | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES));
     
     puts("Ahoy there!");
 }
