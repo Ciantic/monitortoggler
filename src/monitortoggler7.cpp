@@ -200,4 +200,20 @@ int main(int argc, char *argv[]){
                 break;
         }
     }
+    /*
+        Discovered from SetDisplayConfig so far:
+        (First you must know what WIN + P shortcut does in Windows 7, try that.)
+            Computer only:
+                SDC_APPLY|SDC_TOPOLOGY_INTERNAL
+            Projector only:
+                SDC_APPLY|SDC_TOPOLOGY_EXTERNAL
+            Extended
+                SDC_APPLY|SDC_TOPOLOGY_EXTEND
+            Clone
+                SDC_APPLY|SDC_TOPOLOGY_CLONE
+    */
+    if (!Result_DCGDI(SetDisplayConfig(0, NULL, 0, NULL, SDC_VALIDATE|SDC_TOPOLOGY_INTERNAL)))
+        return 0;
+    Result_DCGDI(SetDisplayConfig(0, NULL, 0, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL));
+    puts("Ahoy there!");
 }
