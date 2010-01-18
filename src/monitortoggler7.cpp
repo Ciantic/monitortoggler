@@ -153,20 +153,19 @@ int main(int argc, char *argv[]){
     
     puts("");
     
-    // Loop through all modes ("mode" here actually means monitor, btw)
+    // Loop through all attached monitors (mode = monitor, I suspect)
+    // but same monitor is twice in the array, once as SOURCE and once as TARGET.
     for (int i = 0; i < num_of_modes; i++) {
-
         printf("Info %d:\r\n", i);
-        
+        printf("  adapaterId: %d, ID: %d\r\n", displayModes[i].adapterId, displayModes[i].id);
         switch (displayModes[i].infoType) {
-            // Source information
-            // Current knowledge lead me to deduce that ATTACHED monitors goes to this case:
+            
+            // This case is for all sources
             case DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE:
                 getGDIDeviceNameFromSource(displayModes[i].adapterId, displayModes[i].id);
                 break;
             
-            // Target information
-            // and UNATTACHED monitors goes to this case:
+            // This case is for all targets
             case DISPLAYCONFIG_MODE_INFO_TYPE_TARGET:
                 getMonitorDevicePathFromTarget(displayModes[i].adapterId, displayModes[i].id);
                 getFriendlyNameFromTarget(displayModes[i].adapterId, displayModes[i].id);
