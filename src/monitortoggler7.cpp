@@ -116,21 +116,25 @@ void getFriendlyNameFromTarget(LUID adapterId, UINT32 targetId) {
 
 int main(int argc, char *argv[]){
     UINT32 num_of_paths = 0;
-    UINT32 num_of_infos = 0;
+    UINT32 num_of_modes = 0;
     
-    if (!Result_DCGDI(GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_infos)))
+    // Get number of paths, and number of modes in query
+    if (!Result_DCGDI(GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_modes)))
         return 0;
     
-    printf("num of paths: %d, num of infos: %d\r\n", num_of_paths, num_of_infos);
+    printf("num of paths: %d, num of infos: %d\r\n", num_of_paths, num_of_modes);
 	
+    // Allocate paths and modes dynamically
     DISPLAYCONFIG_PATH_INFO* displayPaths = (DISPLAYCONFIG_PATH_INFO*)malloc(sizeof(DISPLAYCONFIG_PATH_INFO)*num_of_paths);
     memset(displayPaths, 0, sizeof(DISPLAYCONFIG_PATH_INFO)*num_of_paths);
-    DISPLAYCONFIG_MODE_INFO* displayModes = (DISPLAYCONFIG_MODE_INFO*)malloc(sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_infos);
-    memset(displayModes, 0, sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_infos);
+    DISPLAYCONFIG_MODE_INFO* displayModes = (DISPLAYCONFIG_MODE_INFO*)malloc(sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_modes);
+    memset(displayModes, 0, sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_modes);
     
-    if (!Result_QDC(QueryDisplayConfig(QDC_ALL_PATHS, &num_of_paths, displayPaths, &num_of_infos, displayModes, NULL)))
+    // Query for the information (fill in the arrays above)
+    if (!Result_QDC(QueryDisplayConfig(QDC_ALL_PATHS, &num_of_paths, displayPaths, &num_of_modes, displayModes, NULL)))
         return 0;
     
+    // Loop through all paths
     for (int i = 0; i < num_of_paths; i++) {
         printf("Path %d:\r\n", i);
         getGDIDeviceNameFromSource(displayPaths[i].sourceInfo.adapterId, displayPaths[i].sourceInfo.id);
@@ -139,15 +143,18 @@ int main(int argc, char *argv[]){
     
     puts("");
     
-    for (int i = 0; i < num_of_infos; i++) {
+    // Loop through all modes ("mode" here actually means monitor, btw)
+    for (int i = 0; i < num_of_modes; i++) {
 
         printf("Info %d:\r\n", i);
         
         switch (displayModes[i].infoType) {
+            // Source information
             case DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE:
                 getGDIDeviceNameFromSource(displayModes[i].adapterId, displayModes[i].id);
                 break;
             
+            // Target information
             case DISPLAYCONFIG_MODE_INFO_TYPE_TARGET:
                 getMonitorDevicePathFromTarget(displayModes[i].adapterId, displayModes[i].id);
                 getFriendlyNameFromTarget(displayModes[i].adapterId, displayModes[i].id);
