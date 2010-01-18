@@ -19,19 +19,19 @@ int QueryDisplayConfigResult(int result) {
         case ERROR_SUCCESS:
             return 1;
         case ERROR_INVALID_PARAMETER:
-            fputs("Error: The combination of parameters and flags that are specified is invalid.", stderr);
+            fputs("  Error: The combination of parameters and flags that are specified is invalid.", stderr);
             break;
         case ERROR_NOT_SUPPORTED:
-            fputs("Error: The system is not running a graphics driver that was written according to the Windows Vista Display Driver Model. The function is only supported on a system with a Windows Vista Display Driver Model driver running.", stderr);
+            fputs("  Error: The system is not running a graphics driver that was written according to the Windows Vista Display Driver Model. The function is only supported on a system with a Windows Vista Display Driver Model driver running.", stderr);
             break;
         case ERROR_ACCESS_DENIED:
-            fputs("Error: The caller does not have access to the console session. This error occurs if the calling process does not have access to the current desktop or is running on a remote session.", stderr);
+            fputs("  Error: The caller does not have access to the console session. This error occurs if the calling process does not have access to the current desktop or is running on a remote session.", stderr);
             break;
         case ERROR_GEN_FAILURE:
-            fputs("Error: An unspecified error occurred.", stderr);
+            fputs("  Error: An unspecified error occurred.", stderr);
             break;
         case ERROR_INSUFFICIENT_BUFFER:
-            fputs("Error: The supplied path and mode buffer are too small.", stderr);
+            fputs("  Error: The supplied path and mode buffer are too small.", stderr);
             break;
     }
     
@@ -41,22 +41,22 @@ int QueryDisplayConfigResult(int result) {
 int DisplayConfigGetDeviceInfoResult(int result) {
     switch (result) {
         case ERROR_SUCCESS:
-             puts(" The function succeeded.");
+             puts("  The function succeeded.");
              return 1;
         case ERROR_INVALID_PARAMETER:
-             fputs(" The combination of parameters and flags specified are invalid.", stderr);
+             fputs("  Error: The combination of parameters and flags specified are invalid.", stderr);
              break;
         case ERROR_NOT_SUPPORTED:
-             fputs(" The system is not running a graphics driver that was written according to the Windows Vista Display Driver Model. The function is only supported on a system with a Windows Vista Display Driver Model driver running.", stderr);
+             fputs("  Error: The system is not running a graphics driver that was written according to the Windows Vista Display Driver Model. The function is only supported on a system with a Windows Vista Display Driver Model driver running.", stderr);
              break;
         case ERROR_ACCESS_DENIED:
-             fputs(" The caller does not have access to the console session. This error occurs if the calling process does not have access to the current desktop or is running on a remote session.", stderr);
+             fputs("  Error: The caller does not have access to the console session. This error occurs if the calling process does not have access to the current desktop or is running on a remote session.", stderr);
              break;
         case ERROR_INSUFFICIENT_BUFFER:
-             fputs(" The size of the packet that the caller passes is not big enough for the information that the caller requestes.", stderr);
+             fputs("  Error: The size of the packet that the caller passes is not big enough for the information that the caller requestes.", stderr);
              break;
         case ERROR_GEN_FAILURE:
-             fputs(" An unspecified error occurred.", stderr);
+             fputs("  Error: An unspecified error occurred.", stderr);
              break;
     }
     return 0;
@@ -72,12 +72,28 @@ void getDisplayConfigSourceName(LUID adapterId, UINT32 sourceId) {
     deviceName.header = header;
     if (!DisplayConfigGetDeviceInfoResult(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
         return;
+    printf("  GDI Device name:");
     wprintf(deviceName.viewGdiDeviceName);
     puts("");
 }
 
+void getDisplayConfigTargetName(LUID adapterId, UINT32 targetId) {
+    DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName;
+    DISPLAYCONFIG_DEVICE_INFO_HEADER header;
+    header.size = sizeof(DISPLAYCONFIG_TARGET_DEVICE_NAME);
+    header.adapterId = adapterId;
+    header.id = targetId;
+    header.type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME;
+    deviceName.header = header;
+    if (!DisplayConfigGetDeviceInfoResult(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
+        return;
+    printf("  monitor device path: ");
+    wprintf(deviceName.monitorDevicePath);
+    puts("");
+}
+
 int main(int argc, char *argv[]){
-	UINT32 num_of_paths = 0;
+    UINT32 num_of_paths = 0;
     UINT32 num_of_infos = 0;
     GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_infos);
     
@@ -102,6 +118,20 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < num_of_infos; i++) {
         puts("");
         printf("Info %d\r\n", i);
-        getDisplayConfigSourceName(dinfos[i].adapterId, dinfos[i].id);
+        
+        switch (dinfos[i].infoType) {
+            case DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE:
+                getDisplayConfigSourceName(dinfos[i].adapterId, dinfos[i].id);
+                break;
+            
+            case DISPLAYCONFIG_MODE_INFO_TYPE_TARGET:
+                getDisplayConfigTargetName(dinfos[i].adapterId, dinfos[i].id);
+                break;
+            
+            default:
+                fputs("  ERROR: infoType is invalid", stderr);
+                break;
+        }
+        
     }
 }
