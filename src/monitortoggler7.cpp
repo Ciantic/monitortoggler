@@ -14,7 +14,10 @@
 
 #define PATH_ARRAY_ELEMENTS_NUM 10;
 
-int QueryDisplayConfigResult(int result) {
+/* 
+    result = QueryDisplayConfig(...)
+*/
+int Result_QDC(int result) {
     switch (result) {
         case ERROR_SUCCESS:
             return 1;
@@ -38,7 +41,11 @@ int QueryDisplayConfigResult(int result) {
     return 0;
 }
 
-int DisplayConfigGetDeviceInfoResult(int result) {
+/* 
+    result = DisplayConfigGetDeviceInfo(...)
+    result = GetDisplayConfigBufferSizes(...)
+*/
+int Result_DCGDI(int result) {
     switch (result) {
         case ERROR_SUCCESS:
              return 1;
@@ -69,7 +76,7 @@ void getGDIDeviceNameFromSource(LUID adapterId, UINT32 sourceId) {
     header.id = sourceId;
     header.type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME;
     deviceName.header = header;
-    if (!DisplayConfigGetDeviceInfoResult(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
+    if (!Result_DCGDI(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
         return;
     printf("  GDI Device name: ");
     wprintf(deviceName.viewGdiDeviceName);
@@ -84,7 +91,7 @@ void getMonitorDevicePathFromTarget(LUID adapterId, UINT32 targetId) {
     header.id = targetId;
     header.type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME;
     deviceName.header = header;
-    if (!DisplayConfigGetDeviceInfoResult(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
+    if (!Result_DCGDI(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
         return;
     printf("  monitor device path: ");
     wprintf(deviceName.monitorDevicePath);
@@ -100,7 +107,7 @@ void getFriendlyNameFromTarget(LUID adapterId, UINT32 targetId) {
     header.id = targetId;
     header.type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME;
     deviceName.header = header;
-    if (!DisplayConfigGetDeviceInfoResult(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
+    if (!Result_DCGDI(DisplayConfigGetDeviceInfo( (DISPLAYCONFIG_DEVICE_INFO_HEADER*) &deviceName )))
         return;
     printf("  monitor friendly name: ");
     wprintf(deviceName.monitorFriendlyDeviceName);
@@ -110,7 +117,9 @@ void getFriendlyNameFromTarget(LUID adapterId, UINT32 targetId) {
 int main(int argc, char *argv[]){
     UINT32 num_of_paths = 0;
     UINT32 num_of_infos = 0;
-    GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_infos);
+    
+    if (!Result_DCGDI(GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_infos)))
+        return 0;
     
     printf("num of paths: %d, num of infos: %d\r\n", num_of_paths, num_of_infos);
 	
@@ -119,7 +128,7 @@ int main(int argc, char *argv[]){
     DISPLAYCONFIG_MODE_INFO* displayModes = (DISPLAYCONFIG_MODE_INFO*)malloc(sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_infos);
     memset(displayModes, 0, sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_infos);
     
-    if (!QueryDisplayConfigResult(QueryDisplayConfig(QDC_ALL_PATHS, &num_of_paths, displayPaths, &num_of_infos, displayModes, NULL)))
+    if (!Result_QDC(QueryDisplayConfig(QDC_ALL_PATHS, &num_of_paths, displayPaths, &num_of_infos, displayModes, NULL)))
         return 0;
     
     for (int i = 0; i < num_of_paths; i++) {
@@ -145,7 +154,7 @@ int main(int argc, char *argv[]){
                 break;
             
             default:
-                fputs("  ERROR: infoType is invalid", stderr);
+                fputs("  ERROR: infoType is invalid.", stderr);
                 break;
         }
     }
