@@ -145,7 +145,6 @@ int main(int argc, char *argv[]){
         return 0;
     
     // Loop through all paths
-    puts("Notice following syntax in listings (adapterId, ID).");
     puts("");
     puts("Display paths:");
     puts("--------------");
@@ -157,8 +156,10 @@ int main(int argc, char *argv[]){
         else
             puts("  Not active");
         
-        printf("  Source: (%d, %d)\r\n", displayPaths[i].sourceInfo.adapterId, displayPaths[i].sourceInfo.id);
-        printf("  Target: (%d, %d)\r\n", displayPaths[i].targetInfo.adapterId, displayPaths[i].targetInfo.id);
+        printf("  Source AID: %d\r\n", displayPaths[i].sourceInfo.adapterId);
+        printf("  Source  ID: %d\r\n", displayPaths[i].sourceInfo.id);
+        printf("  Target AID: %d\r\n", displayPaths[i].targetInfo.adapterId);
+        printf("  Target  ID: %d\r\n", displayPaths[i].targetInfo.id);
         getGDIDeviceNameFromSource(displayPaths[i].sourceInfo.adapterId, displayPaths[i].sourceInfo.id);
     }
     
@@ -176,21 +177,21 @@ int main(int argc, char *argv[]){
             // This case is for all sources
             case DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE:
                 getGDIDeviceNameFromSource(displayModes[i].adapterId, displayModes[i].id);
-                printf("  Source:");
+                printf("  Source AID: %d\r\n", displayModes[i].adapterId);
+                printf("  Source  ID: %d\r\n", displayModes[i].id);
                 break;
             
             // This case is for all targets
             case DISPLAYCONFIG_MODE_INFO_TYPE_TARGET:
                 getMonitorDevicePathFromTarget(displayModes[i].adapterId, displayModes[i].id);
                 getFriendlyNameFromTarget(displayModes[i].adapterId, displayModes[i].id);
-                printf("  Target:");
+                printf("  Target AID: %d\r\n", displayModes[i].adapterId);
+                printf("  Target  ID: %d\r\n", displayModes[i].id);
                 break;
             
             default:
                 fputs("  ERROR: infoType is invalid.", stderr);
                 break;
         }
-        
-        printf(" (%d, %d)\r\n", displayModes[i].adapterId, displayModes[i].id);
     }
 }
