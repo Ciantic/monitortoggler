@@ -160,11 +160,14 @@ int main(int argc, char *argv[]){
         
         switch (displayModes[i].infoType) {
             // Source information
+            // Current knowledge lead me to deduce that ATTACHED monitors goes to this case:
             case DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE:
+                
                 getGDIDeviceNameFromSource(displayModes[i].adapterId, displayModes[i].id);
                 break;
             
             // Target information
+            // and UNATTACHED monitors goes to this case:
             case DISPLAYCONFIG_MODE_INFO_TYPE_TARGET:
                 getMonitorDevicePathFromTarget(displayModes[i].adapterId, displayModes[i].id);
                 getFriendlyNameFromTarget(displayModes[i].adapterId, displayModes[i].id);
