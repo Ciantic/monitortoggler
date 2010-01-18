@@ -207,13 +207,13 @@ int main(int argc, char *argv[]){
                 SDC_APPLY|SDC_TOPOLOGY_INTERNAL
             Projector only:
                 SDC_APPLY|SDC_TOPOLOGY_EXTERNAL
-            Extended
+            Extended:
                 SDC_APPLY|SDC_TOPOLOGY_EXTEND
-            Clone
+            Duplicate a.k.a clone:
                 SDC_APPLY|SDC_TOPOLOGY_CLONE
     */
-    if (!Result_DCGDI(SetDisplayConfig(0, NULL, 0, NULL, SDC_VALIDATE|SDC_TOPOLOGY_INTERNAL)))
-        return 0;
-    Result_DCGDI(SetDisplayConfig(0, NULL, 0, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL));
+    //if (!Result_DCGDI(SetDisplayConfig(0, NULL, 0, NULL, SDC_VALIDATE|SDC_TOPOLOGY_INTERNAL)))
+    //    return 0;
+    //Result_DCGDI(SetDisplayConfig(0, NULL, 0, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL));
     puts("Ahoy there!");
 }
