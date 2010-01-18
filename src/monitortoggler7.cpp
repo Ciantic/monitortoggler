@@ -152,14 +152,19 @@ int main(int argc, char *argv[]){
         printf("Path %d:\r\n", i);
         
         if (displayPaths[i].flags & DISPLAYCONFIG_PATH_ACTIVE)
-            puts("  Is active");
+            puts("  ACTIVE");
         else
-            puts("  Not active");
+            puts("  NOT ACTIVE");
         
+        if (displayPaths[i].targetInfo.targetAvailable)
+            puts("  AVAILABLE");
+        else
+            puts("  NOT AVAILABLE");
         printf("  Source AID: %d\r\n", displayPaths[i].sourceInfo.adapterId);
         printf("  Source  ID: %d\r\n", displayPaths[i].sourceInfo.id);
         printf("  Target AID: %d\r\n", displayPaths[i].targetInfo.adapterId);
         printf("  Target  ID: %d\r\n", displayPaths[i].targetInfo.id);
+        
         getGDIDeviceNameFromSource(displayPaths[i].sourceInfo.adapterId, displayPaths[i].sourceInfo.id);
     }
     
