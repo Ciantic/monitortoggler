@@ -132,7 +132,7 @@ int main(int argc, char *argv[]){
     if (!Result_DCGDI(GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_modes)))
         return 0;
     
-    printf("num of paths: %d, num of infos: %d\r\n", num_of_paths, num_of_modes);
+    printf("num of paths: %d, num of infos: %d\r\n\r\n", num_of_paths, num_of_modes);
 	
     // Allocate paths and modes dynamically
     DISPLAYCONFIG_PATH_INFO* displayPaths = (DISPLAYCONFIG_PATH_INFO*)malloc(sizeof(DISPLAYCONFIG_PATH_INFO)*num_of_paths);
@@ -145,12 +145,21 @@ int main(int argc, char *argv[]){
         return 0;
     
     // Loop through all paths
-    puts("Paths (?):");
-    puts("----------");
+    puts("Notice following syntax in listings (adapterId, ID).");
+    puts("");
+    puts("Display paths:");
+    puts("--------------");
     for (int i = 0; i < num_of_paths; i++) {
         printf("Path %d:\r\n", i);
+        
+        if (displayPaths[i].flags & DISPLAYCONFIG_PATH_ACTIVE)
+            puts("  Is active");
+        else
+            puts("  Not active");
+        
+        printf("  Source: (%d, %d)\r\n", displayPaths[i].sourceInfo.adapterId, displayPaths[i].sourceInfo.id);
+        printf("  Target: (%d, %d)\r\n", displayPaths[i].targetInfo.adapterId, displayPaths[i].targetInfo.id);
         getGDIDeviceNameFromSource(displayPaths[i].sourceInfo.adapterId, displayPaths[i].sourceInfo.id);
-        printf("  Source id: %d\r\n", displayPaths[i].sourceInfo.id);
     }
     
     puts("");
@@ -161,23 +170,27 @@ int main(int argc, char *argv[]){
     puts("-----------------------");
     for (int i = 0; i < num_of_modes; i++) {
         printf("Info %d:\r\n", i);
-        printf("  adapaterId: %d, ID: %d\r\n", displayModes[i].adapterId, displayModes[i].id);
+        
         switch (displayModes[i].infoType) {
             
             // This case is for all sources
             case DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE:
                 getGDIDeviceNameFromSource(displayModes[i].adapterId, displayModes[i].id);
+                printf("  Source:");
                 break;
             
             // This case is for all targets
             case DISPLAYCONFIG_MODE_INFO_TYPE_TARGET:
                 getMonitorDevicePathFromTarget(displayModes[i].adapterId, displayModes[i].id);
                 getFriendlyNameFromTarget(displayModes[i].adapterId, displayModes[i].id);
+                printf("  Target:");
                 break;
             
             default:
                 fputs("  ERROR: infoType is invalid.", stderr);
                 break;
         }
+        
+        printf(" (%d, %d)\r\n", displayModes[i].adapterId, displayModes[i].id);
     }
 }
