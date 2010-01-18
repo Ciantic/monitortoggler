@@ -240,7 +240,7 @@ int main(int argc, char *argv[]){
     //    return 0;
     //Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY | SDC_TOPOLOGY_CLONE));
     
-    // Save to cloned
+    // Save to cloned (this is not possible unfortunately)
     //if (!Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_VALIDATE|SDC_SAVE_TO_DATABASE|SDC_USE_SUPPLIED_DISPLAY_CONFIG|SDC_TOPOLOGY_CLONE)))
     //    return 0;
     //Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL));
