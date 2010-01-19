@@ -33,9 +33,9 @@ Restore Monitors 0.1
 --------------------
     Usage: restoremonitors7.exe <-save|-open> <filename>
 
-    Capable of restoring monitors to saved state under Windows 7,
-    uses Windows 7 CCD API to save, and restore the settings from
-    file.
+      Capable of restoring monitors to saved state under Windows 7,
+      uses Windows 7 CCD API to save, and restore the settings from
+      file.
 
        -save
            Used to save settings from file.
