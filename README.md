@@ -1,3 +1,10 @@
+Monitor utilities
+=================
+
+I personally recommend Restore Monitors instead of Monitor Toggler if you just happen 
+to have Windows 7. Restore Monitors saves *current* settings of all monitors, and saves
+them to file. Afterwards you can change settings and restore the old settings from file.
+
 Monitor toggler 0.3.2
 ---------------------
     Usage: monitortoggler.exe <monitornumber> [<forceState>] [<apply>]
