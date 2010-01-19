@@ -4,6 +4,32 @@ Monitor utilities
 I personally recommend Restore Monitors instead of Monitor Toggler if you just happen 
 to have Windows 7. Restore Monitors saves *current* settings of all monitors, and saves
 them to file. Afterwards you can change settings and restore the old settings from file.
+ 
+
+Restore Monitors 0.2
+--------------------
+
+    Usage: restoremonitors7.exe [<-save>] <filename>
+
+      Capable of restoring monitors to saved state under Windows 7.
+      Uses Windows 7 CCD API to save, and restore the settings from
+      file.
+
+      By giving only filename the program tries to open and restore
+      the saved settings in the file.
+
+       -save
+           Used to save settings to file.
+
+       -equal
+           Prints '1' if current settings equals the one in the file,
+           otherwise '0' or '  ERROR:...'.
+
+
+      Author:     Jari Pennanen (2010) <jari.pennanen@gmail.com>
+      License:    FreeBSD License, see COPYING
+      Repository: http://github.com/Ciantic/monitortoggler
+      
 
 Monitor toggler 0.3.2
 ---------------------
@@ -30,31 +56,6 @@ Monitor toggler 0.3.2
                  1 = Apply changes immediately (default)
                  0 = Do not apply changes
                      You have to call second time to apply changes
-
-      Author:     Jari Pennanen (2010) <jari.pennanen@gmail.com>
-      License:    FreeBSD License, see COPYING
-      Repository: http://github.com/Ciantic/monitortoggler
-  
-
-Restore Monitors 0.2
---------------------
-
-    Usage: restoremonitors7.exe [<-save>] <filename>
-
-      Capable of restoring monitors to saved state under Windows 7.
-      Uses Windows 7 CCD API to save, and restore the settings from
-      file.
-
-      By giving only filename the program tries to open and restore
-      the saved settings in the file.
-
-       -save
-           Used to save settings to file.
-
-       -equal
-           Prints '1' if current settings equals the one in the file,
-           otherwise '0' or '  ERROR:...'.
-
 
       Author:     Jari Pennanen (2010) <jari.pennanen@gmail.com>
       License:    FreeBSD License, see COPYING
