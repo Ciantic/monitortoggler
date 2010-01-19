@@ -263,7 +263,7 @@ int main(int argc, char *argv[]){
             "  file.\n"
             "\n"
             "   -save\n"
-            "       Used to save settings from file.\n"
+            "       Used to save settings to file.\n"
             "\n"
             "   -open\n"
             "       Used to open and restore settings from file.\n"

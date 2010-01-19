@@ -45,7 +45,7 @@ Restore Monitors 0.1
       file.
 
        -save
-           Used to save settings from file.
+           Used to save settings to file.
 
        -open
            Used to open and restore settings from file.
