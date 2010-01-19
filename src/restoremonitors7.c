@@ -5,9 +5,12 @@
     I might have found a most difficult way of retrieving "\\.\DISPLAYX" string.
     
     http://msdn.microsoft.com/en-us/library/dd567877.aspx
+    
+    TODO: Naming conventions in this file are odd.
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <math.h>
@@ -241,32 +244,79 @@ void printDisplayModeInfos(UINT32 num_of_modes, DISPLAYCONFIG_MODE_INFO* display
     }
 }
 
-enum ActionType { OPEN, SAVE };
+int getCurrentSettings(UINT32* num_of_paths, UINT32* num_of_modes, DISPLAYCONFIG_PATH_INFO** displayPaths, DISPLAYCONFIG_MODE_INFO** displayModes) {
+    // Get number of paths, and number of modes in query
+    if (!Result_DCGDI(GetDisplayConfigBufferSizes(QDC_ALL_PATHS, num_of_paths, num_of_modes)))
+        return 0;
+    
+    // Allocate paths and modes dynamically
+    *displayPaths = (DISPLAYCONFIG_PATH_INFO*)calloc((int)num_of_paths, sizeof(DISPLAYCONFIG_PATH_INFO));
+    *displayModes = (DISPLAYCONFIG_MODE_INFO*)calloc((int)num_of_modes, sizeof(DISPLAYCONFIG_MODE_INFO));
+    
+    // Query for the information (fill in the arrays above)
+    if (!Result_QDC(QueryDisplayConfig(QDC_ALL_PATHS, num_of_paths, (*displayPaths), num_of_modes, (*displayModes), NULL)))
+        return 0;
+    
+    return 1;
+}
+
+enum ActionType { OPEN, SAVE, EQUAL };
 
 int main(int argc, char *argv[]){
     UINT32 num_of_paths = 0;
     UINT32 num_of_modes = 0;
     DISPLAYCONFIG_PATH_INFO* displayPaths = NULL; 
     DISPLAYCONFIG_MODE_INFO* displayModes = NULL;
+    
+    UINT32 num_of_paths2 = 0;
+    UINT32 num_of_modes2 = 0;
+    DISPLAYCONFIG_PATH_INFO* displayPaths2 = NULL; 
+    DISPLAYCONFIG_MODE_INFO* displayModes2 = NULL;
+
     enum ActionType action;
     char* filename;
     int debug = 0;
+    BOOL show_usage = TRUE;
+    
+    // -save argument given
+    if (argc == 3 && strcmp(argv[1], "-save") == 0) {
+        action = SAVE;
+        filename = argv[2];
+        show_usage = FALSE;
+        
+    // -equal argument given
+    } else if (argc == 3 && strcmp(argv[1], "-equal") == 0) {
+        action = EQUAL;
+        filename = argv[2];
+        show_usage = FALSE;
+        
+    // No arguments given, assumed open
+    } else if (argc == 2) {
+        action = OPEN;
+        filename = argv[1];
+        show_usage = FALSE;
+    }
 
-    if (argc <= 2) {
+    // Show usage if invalid options or none
+    if (show_usage) {
         puts(
-            "Restore Monitors 0.1\n"
+            "Restore Monitors 0.2\n"
             "\n"
-            "Usage: restoremonitors7.exe <-save|-open> <filename>\n"
+            "Usage: restoremonitors7.exe [<-save>] <filename>\n"
             "\n"
-            "  Capable of restoring monitors to saved state under Windows 7,\n"
-            "  uses Windows 7 CCD API to save, and restore the settings from\n"
+            "  Capable of restoring monitors to saved state under Windows 7.\n"
+            "  Uses Windows 7 CCD API to save, and restore the settings from\n"
             "  file.\n"
+            "\n"
+            "  By giving only filename the program tries to open and restore\n"
+            "  the saved settings in the file.\n"
             "\n"
             "   -save\n"
             "       Used to save settings to file.\n"
             "\n"
-            "   -open\n"
-            "       Used to open and restore settings from file.\n"
+            "   -equal\n"
+            "       Prints '1' if current settings equals the one in the file,\n"
+            "       otherwise '0' or '  ERROR:...'.\n"
             "\n"
             "\n  Author:     Jari Pennanen (2010) <jari.pennanen@gmail.com>"
             "\n  License:    FreeBSD License, see COPYING"
@@ -276,18 +326,32 @@ int main(int argc, char *argv[]){
         return 0;
     }
     
-    if (strcmp(argv[1], "-open") == 0) {
-        action = OPEN;
-    } else if (strcmp(argv[1], "-save") == 0) {
-        action = SAVE;
-    } else {
-        fputs("  Error: Invalid options given.", stderr);
-        return 0;
-    }
-    
-    filename = argv[2];
-    
     switch (action) {
+        case EQUAL:
+            // Settings in file:
+            if (!openSettingsFromFile(filename, &num_of_paths, &num_of_modes, &displayPaths, &displayModes))
+                return 0;
+            
+            // Current settings in computer
+            getCurrentSettings(&num_of_paths2, &num_of_modes2, &displayPaths2, &displayModes2);
+            
+            // Compare settings of file and computer
+            if (num_of_paths == num_of_paths2 && num_of_modes == num_of_modes2) {
+                if (memcmp(displayPaths, displayPaths2, num_of_paths*sizeof(DISPLAYCONFIG_PATH_INFO)) != 0) {
+                    puts("0");
+                    return 0;
+                }
+                if (memcmp(displayModes, displayModes2, num_of_modes*sizeof(DISPLAYCONFIG_MODE_INFO)) != 0) {
+                    puts("0");
+                    return 0;
+                }
+                puts("1");
+                return 0;
+            }
+            puts("0");
+            return 0;
+
+        
         case OPEN:
             printf("Opening settings from '%s' file...\n", filename);
             if (!openSettingsFromFile(filename, &num_of_paths, &num_of_modes, &displayPaths, &displayModes))
@@ -310,17 +374,7 @@ int main(int argc, char *argv[]){
             
         case SAVE:
             puts("Querying current settings...");
-            // Get number of paths, and number of modes in query
-            if (!Result_DCGDI(GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_modes)))
-                return 0;
-            
-            // Allocate paths and modes dynamically
-            displayPaths = (DISPLAYCONFIG_PATH_INFO*)calloc((int)num_of_paths, sizeof(DISPLAYCONFIG_PATH_INFO));
-            displayModes = (DISPLAYCONFIG_MODE_INFO*)calloc((int)num_of_modes, sizeof(DISPLAYCONFIG_MODE_INFO));
-            
-            // Query for the information (fill in the arrays above)
-            if (!Result_QDC(QueryDisplayConfig(QDC_ALL_PATHS, &num_of_paths, displayPaths, &num_of_modes, displayModes, NULL)))
-                return 0;
+            getCurrentSettings(&num_of_paths, &num_of_modes, &displayPaths, &displayModes);
             
             if (debug) {
                 printf("num of paths %d\n", num_of_paths);
