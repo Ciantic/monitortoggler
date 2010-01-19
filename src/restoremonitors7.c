@@ -125,31 +125,70 @@ void getFriendlyNameFromTarget(LUID adapterId, UINT32 targetId) {
     puts("");
 }
 
-int main(int argc, char *argv[]){
-    UINT32 num_of_paths = 0;
-    UINT32 num_of_modes = 0;
+int saveSettingsToFile(char* filename, UINT32 num_of_paths, UINT32 num_of_modes, DISPLAYCONFIG_PATH_INFO **displayPaths, DISPLAYCONFIG_MODE_INFO **displayModes) {    
+    FILE* settingsFile;
     
-    // Get number of paths, and number of modes in query
-    if (!Result_DCGDI(GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_modes)))
+    settingsFile = fopen(filename, "wb");
+    if (settingsFile == NULL) {
+        fputs("  Error: Could not open file...", stderr);
         return 0;
+    }
     
-    printf("num of paths: %d, num of infos: %d\r\n\r\n", num_of_paths, num_of_modes);
-	
-    // Allocate paths and modes dynamically
-    DISPLAYCONFIG_PATH_INFO* displayPaths = (DISPLAYCONFIG_PATH_INFO*)malloc(sizeof(DISPLAYCONFIG_PATH_INFO)*num_of_paths);
-    memset(displayPaths, 0, sizeof(DISPLAYCONFIG_PATH_INFO)*num_of_paths);
-    DISPLAYCONFIG_MODE_INFO* displayModes = (DISPLAYCONFIG_MODE_INFO*)malloc(sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_modes);
-    memset(displayModes, 0, sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_modes);
-    
-    // Query for the information (fill in the arrays above)
-    if (!Result_QDC(QueryDisplayConfig(QDC_ALL_PATHS, &num_of_paths, displayPaths, &num_of_modes, displayModes, NULL)))
+    fputs("SetDisplayConfig", settingsFile);
+    fwrite(&num_of_paths, sizeof(UINT32), 1, settingsFile);
+    fwrite(&num_of_modes, sizeof(UINT32), 1, settingsFile);
+    fwrite((*displayPaths), sizeof(DISPLAYCONFIG_PATH_INFO)*num_of_paths, 1, settingsFile);
+    fwrite((*displayModes), sizeof(DISPLAYCONFIG_MODE_INFO)*num_of_modes, 1, settingsFile);
+    fclose(settingsFile);
+    return 1;
+}
+
+int openSettingsFromFile(char* filename, UINT32 *num_of_paths, UINT32 *num_of_modes, DISPLAYCONFIG_PATH_INFO **displayPaths, DISPLAYCONFIG_MODE_INFO **displayModes) {
+    FILE* settingsFile;
+    char header [17];
+    settingsFile = fopen(filename, "rb");
+    if (settingsFile == NULL) {
+        fputs("  Error: Could not open file...", stderr);
         return 0;
+    }
     
-    // Loop through all paths
+    // Header "SetDisplayConfig"
+    fgets(header, 17, settingsFile);
+    if (strcmp(header, "SetDisplayConfig") != 0) {
+        fputs("  Error: Header of the file is incorrect...", stderr);
+        return 0;
+    }
+    
+    // Array sizes should be first
+    fread(num_of_paths, sizeof(UINT32), 1, settingsFile);
+    fread(num_of_modes, sizeof(UINT32), 1, settingsFile);
+    
+    // Allocate arrays
+    *displayPaths = (DISPLAYCONFIG_PATH_INFO*)calloc((int)num_of_paths, sizeof(DISPLAYCONFIG_PATH_INFO));
+    *displayModes = (DISPLAYCONFIG_MODE_INFO*)calloc((int)num_of_modes, sizeof(DISPLAYCONFIG_MODE_INFO));
+    
+    // Read arrays
+    fread((*displayPaths), sizeof(DISPLAYCONFIG_PATH_INFO) * (*num_of_paths), 1, settingsFile);
+    fread((*displayModes), sizeof(DISPLAYCONFIG_MODE_INFO) * (*num_of_modes), 1, settingsFile);
+    
+    // It should be now at the end of file:
+    fgetc(settingsFile);
+    if (!feof(settingsFile)) {
+        fputs("  Error: EOF is not in right place...", stderr);
+        return 0;
+    }
+    
+    // Close the file
+    fclose(settingsFile);
+    return 1;
+}
+
+void printDisplayPaths(UINT32 num_of_paths, DISPLAYCONFIG_PATH_INFO* displayPaths) {
+    int i;
     puts("");
     puts("Display paths:");
     puts("--------------");
-    for (int i = 0; i < num_of_paths; i++) {
+    for (i = 0; i < num_of_paths; i++) {
         printf("Path %d:\r\n", i);
         
         if (displayPaths[i].flags & DISPLAYCONFIG_PATH_ACTIVE)
@@ -168,14 +207,14 @@ int main(int argc, char *argv[]){
         
         getGDIDeviceNameFromSource(displayPaths[i].sourceInfo.adapterId, displayPaths[i].sourceInfo.id);
     }
-    
-    puts("");
-    
-    // Loop through all attached monitors (mode = monitor, I suspect)
+}
+
+void printDisplayModeInfos(UINT32 num_of_modes, DISPLAYCONFIG_MODE_INFO* displayModes) {
+    int i;
     // but same monitor is twice in the array, once as SOURCE and once as TARGET.
     puts("Attached monitor infos:");
     puts("-----------------------");
-    for (int i = 0; i < num_of_modes; i++) {
+    for (i = 0; i < num_of_modes; i++) {
         printf("Info %d:\r\n", i);
         
         switch (displayModes[i].infoType) {
@@ -200,38 +239,103 @@ int main(int argc, char *argv[]){
                 break;
         }
     }
-    /*
-        Discovered from SetDisplayConfig so far:
-        ----------------------------------------
-        (First you must know what WIN + P shortcut does in Windows 7, try that.)
+}
+
+enum ActionType { OPEN, SAVE };
+
+int main(int argc, char *argv[]){
+    UINT32 num_of_paths = 0;
+    UINT32 num_of_modes = 0;
+    DISPLAYCONFIG_PATH_INFO* displayPaths = NULL; 
+    DISPLAYCONFIG_MODE_INFO* displayModes = NULL;
+    enum ActionType action;
+    char* filename;
+    int debug = 0;
+
+    if (argc <= 2) {
+        puts(
+            "Restore Monitors 0.1\n"
+            "\n"
+            "Usage: restoremonitors7.exe <-save|-open> <filename>\n"
+            "\n"
+            "Capable of restoring monitors to saved state under Windows 7,\n"
+            "uses Windows 7 CCD API to save, and restore the settings from\n"
+            "file.\n"
+            "\n"
+            "   -save\n"
+            "       Used to save settings from file.\n"
+            "\n"
+            "   -open\n"
+            "       Used to open and restore settings from file.\n"
+            "\n"
+            "\n  Author:     Jari Pennanen (2010) <jari.pennanen@gmail.com>"
+            "\n  License:    FreeBSD License, see COPYING"
+            "\n  Repository: http://github.com/Ciantic/monitortoggler"
+        );
         
-        Computer only:
-            SDC_APPLY|SDC_TOPOLOGY_INTERNAL
-        Projector only:
-            SDC_APPLY|SDC_TOPOLOGY_EXTERNAL
-        Extended:
-            SDC_APPLY|SDC_TOPOLOGY_EXTEND
-        Duplicate a.k.a clone:
-            SDC_APPLY|SDC_TOPOLOGY_CLONE
-    
-        E.g. SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY|SDC_TOPOLOGY_INTERNAL);
-    
-        Also what I've understood one cannot save own settings to "Computer only" or
-        "Projector only" or "Extended" using SetDisplayConfig(...) unfortunately.
-    */
-    
-    // Change to cloned
-    //if (!Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_VALIDATE | SDC_TOPOLOGY_CLONE)))
-    //    return 0;
-    //Result_DCGDI(SetDisplayConfig(NULL, NULL, NULL, NULL, SDC_APPLY | SDC_TOPOLOGY_CLONE));
-    
-    
-    puts("Now change your display settings, from 'Screen Resolution' -dialog of Windows 7...");
-    puts("Press enter to switch back (should not do anything if you don't change settings)...");
-    getchar();
-    if (!Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_VALIDATE | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES)))
         return 0;
-    Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_APPLY | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES));
+    }
     
-    puts("Switched back!");
+    if (strcmp(argv[1], "-open") == 0) {
+        action = OPEN;
+    } else if (strcmp(argv[1], "-save") == 0) {
+        action = SAVE;
+    } else {
+        fputs("  Error: Invalid options given.", stderr);
+        return 0;
+    }
+    
+    filename = argv[2];
+    
+    switch (action) {
+        case OPEN:
+            printf("Opening settings from '%s' file...\n", filename);
+            if (!openSettingsFromFile(filename, &num_of_paths, &num_of_modes, &displayPaths, &displayModes))
+                return 0;
+            
+            if (debug) {
+                printf("num of paths %d\n", num_of_paths);
+                printf("num of modes %d\n", num_of_modes);
+                printDisplayPaths(num_of_paths, displayPaths);
+                printDisplayModeInfos(num_of_modes, displayModes);
+            }
+            
+            puts("Validating settings...");
+            if (!Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_VALIDATE | SDC_USE_SUPPLIED_DISPLAY_CONFIG)))
+                return 0;
+            puts("Restoring settings...");
+            Result_DCGDI(SetDisplayConfig(num_of_paths, displayPaths, num_of_modes, displayModes, SDC_APPLY | SDC_USE_SUPPLIED_DISPLAY_CONFIG));
+            break;
+            
+            
+        case SAVE:
+            puts("Querying current settings...");
+            // Get number of paths, and number of modes in query
+            if (!Result_DCGDI(GetDisplayConfigBufferSizes(QDC_ALL_PATHS, &num_of_paths, &num_of_modes)))
+                return 0;
+            
+            // Allocate paths and modes dynamically
+            displayPaths = (DISPLAYCONFIG_PATH_INFO*)calloc((int)num_of_paths, sizeof(DISPLAYCONFIG_PATH_INFO));
+            displayModes = (DISPLAYCONFIG_MODE_INFO*)calloc((int)num_of_modes, sizeof(DISPLAYCONFIG_MODE_INFO));
+            
+            // Query for the information (fill in the arrays above)
+            if (!Result_QDC(QueryDisplayConfig(QDC_ALL_PATHS, &num_of_paths, displayPaths, &num_of_modes, displayModes, NULL)))
+                return 0;
+            
+            if (debug) {
+                printf("num of paths %d\n", num_of_paths);
+                printf("num of modes %d\n", num_of_modes);
+                printDisplayPaths(num_of_paths, displayPaths);
+                printDisplayModeInfos(num_of_modes, displayModes);
+            }
+            
+            printf("Saving settings to '%s'...\n", filename);
+            if (!saveSettingsToFile(filename, num_of_paths, num_of_modes, &displayPaths, &displayModes))
+                return 0;
+            break;
+    }
+    free(displayPaths);
+    free(displayModes);
+    puts("Done.");
+    return 0;
 }
