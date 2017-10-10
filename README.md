@@ -6,7 +6,7 @@ to have Windows 7. Restore Monitors saves *current* settings of all monitors, an
 them to file. Afterwards you can change settings and restore the old settings from file.
  
 
-Restore Monitors 0.2
+Restore Monitors 0.3
 --------------------
 
     Usage: restoremonitors7.exe [<-save>] <filename>
@@ -26,7 +26,8 @@ Restore Monitors 0.2
            otherwise '0' or '  ERROR:...'.
 
 
-      Author:     Jari Pennanen (2010) <jari.pennanen@gmail.com>
+      Authors:    Rob Bresalier (2017)
+                  Jari Pennanen (2010) <jari.pennanen@gmail.com>
       License:    FreeBSD License, see COPYING
       Repository: http://github.com/Ciantic/monitortoggler
       
